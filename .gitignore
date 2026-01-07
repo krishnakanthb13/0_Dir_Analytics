@@ -1,0 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE settings
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# =============================================================================
+# USER DATA - Do not commit personal scan data
+# =============================================================================
+Data File/
+*.db
+*.log
+
+# CSV exports (contain personal file paths)
+export_*.csv
+
+# =============================================================================
+# System files
+# =============================================================================
+.DS_Store
+Thumbs.db
+desktop.ini
