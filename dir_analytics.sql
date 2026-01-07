@@ -5,29 +5,34 @@
 -- Database: Data File/dir_analytics.db
 -- =============================================================================
 
--- #############################################################################
+-- -----------------------------------------------------------------------------
 -- CONFIGURATION: Set your scan_root_directory here
--- #############################################################################
+-- -----------------------------------------------------------------------------
 -- Change this value to filter by different drives/directories:
 --   'D:\'  for D: drive
 --   'E:\'  for E: drive
 --   'C:\Users\ADMIN\Documents'  for Documents folder
--- 
--- To use: Replace @SCAN_ROOT in queries below, or use the variable method
 
--- Option 1: Create a temporary table to store the selected root
--- DROP TABLE IF EXISTS config;
--- CREATE TEMP TABLE config (scan_root TEXT);
--- INSERT INTO config VALUES ('D:\');
+-- -----------------------------------------------------------------------------
 
--- Option 2: Simply replace @SCAN_ROOT with your path in each query
+DROP VIEW IF EXISTS selected_root;
 
--- For convenience, use Find & Replace:
---   Find: @SCAN_ROOT
---   Replace: 'E:\'  (or your desired path)
+CREATE TEMP VIEW selected_root AS
+SELECT
+    CASE 3
+        WHEN 1 THEN 'E:'
+        WHEN 2 THEN 'D:'
+        WHEN 3 THEN 'C:\Users\ADMIN\Documents'
+        WHEN 4 THEN 'C:\Users\ADMIN\Downloads'
+        WHEN 5 THEN 'C:\Users\ADMIN\OneDrive\Documents'
+        WHEN 6 THEN 'C:\Users\ADMIN\OneDrive\Desktop'
+        WHEN 7 THEN 'C:\Users\ADMIN\OneDrive\Pictures'
+        ELSE 'E:\\'
+    END AS scan_root;
 
--- #############################################################################
-
+SELECT scan_root FROM selected_root
+	
+-- -----------------------------------------------------------------------------
 -- Current Scan Roots in Database (run this first to see available options)
 SELECT 
     scan_root_directory,
@@ -39,18 +44,9 @@ WHERE scan_root_directory IS NOT NULL
 GROUP BY scan_root_directory
 ORDER BY file_count DESC;
 
-DECLARE @SCAN_ROOT TEXT;
-SET @SCAN_ROOT = 'E:\';
--- SET @SCAN_ROOT = 'D:\';
--- SET @SCAN_ROOT = 'C:\Users\ADMIN\Documents';
--- SET @SCAN_ROOT = 'C:\Users\ADMIN\Downloads';
--- SET @SCAN_ROOT = 'C:\Users\ADMIN\OneDrive\Documents';
--- SET @SCAN_ROOT = 'C:\Users\ADMIN\OneDrive\Desktop';
--- SET @SCAN_ROOT = 'C:\Users\ADMIN\OneDrive\Pictures';
-
 -- -----------------------------------------------------------------------------
 -- TOP N LARGEST FILES
--- Replace @SCAN_ROOT with your path, e.g., 'E:\'
+-- Replace (SELECT scan_root FROM selected_root) with your path, e.g., 'E:\'
 -- -----------------------------------------------------------------------------
 SELECT 
     file_name,
@@ -60,7 +56,7 @@ SELECT
     full_path
 FROM files
 WHERE is_deleted = 0 
-  AND scan_root_directory = @SCAN_ROOT
+  AND scan_root_directory = (SELECT scan_root FROM selected_root)
 ORDER BY file_size_bytes DESC
 LIMIT 20;
 
@@ -73,7 +69,7 @@ SELECT
     printf("%.2f GB", SUM(file_size_bytes) / 1073741824.0) as total_size
 FROM files
 WHERE is_deleted = 0
-  AND scan_root_directory = @SCAN_ROOT;
+  AND scan_root_directory = (SELECT scan_root FROM selected_root);
 
 -- Unique directories and extensions
 SELECT 
@@ -81,17 +77,17 @@ SELECT
     COUNT(DISTINCT file_extension) as unique_extensions
 FROM files
 WHERE is_deleted = 0
-  AND scan_root_directory = @SCAN_ROOT;
+  AND scan_root_directory = (SELECT scan_root FROM selected_root);
 
 -- Largest and smallest files
 SELECT 'Largest' as type, file_name, file_size_readable
 FROM files 
-WHERE is_deleted = 0 AND scan_root_directory = @SCAN_ROOT
-ORDER BY file_size_bytes DESC LIMIT 1
-UNION ALL
+WHERE is_deleted = 0 AND scan_root_directory = (SELECT scan_root FROM selected_root)
+ORDER BY file_size_bytes DESC LIMIT 1;
+
 SELECT 'Smallest' as type, file_name, file_size_readable
 FROM files 
-WHERE is_deleted = 0 AND file_size_bytes > 0 AND scan_root_directory = @SCAN_ROOT
+WHERE is_deleted = 0 AND file_size_bytes > 0 AND scan_root_directory = (SELECT scan_root FROM selected_root)
 ORDER BY file_size_bytes ASC LIMIT 1;
 
 -- -----------------------------------------------------------------------------
@@ -103,10 +99,10 @@ SELECT
     SUM(file_size_bytes) as total_bytes,
     printf("%.2f MB", SUM(file_size_bytes) / 1048576.0) as total_size,
     printf("%.1f%%", SUM(file_size_bytes) * 100.0 / 
-        (SELECT SUM(file_size_bytes) FROM files WHERE is_deleted = 0 AND scan_root_directory = @SCAN_ROOT)) as percentage
+        (SELECT SUM(file_size_bytes) FROM files WHERE is_deleted = 0 AND scan_root_directory = (SELECT scan_root FROM selected_root))) as percentage
 FROM files
 WHERE is_deleted = 0
-  AND scan_root_directory = @SCAN_ROOT
+  AND scan_root_directory = (SELECT scan_root FROM selected_root)
 GROUP BY file_extension
 ORDER BY total_bytes DESC
 LIMIT 30;
@@ -123,7 +119,7 @@ SELECT
 FROM files
 WHERE is_deleted = 0 
   AND duplicate_group IS NOT NULL
-  AND scan_root_directory = @SCAN_ROOT
+  AND scan_root_directory = (SELECT scan_root FROM selected_root)
 GROUP BY duplicate_group
 ORDER BY duplicate_count DESC;
 
@@ -136,7 +132,7 @@ SELECT
 FROM files
 WHERE is_deleted = 0 
   AND duplicate_group IS NOT NULL
-  AND scan_root_directory = @SCAN_ROOT
+  AND scan_root_directory = (SELECT scan_root FROM selected_root)
 ORDER BY duplicate_group, file_name;
 
 -- Wasted space from duplicates
@@ -149,7 +145,7 @@ FROM (
     FROM files
     WHERE is_deleted = 0 
       AND duplicate_group IS NOT NULL
-      AND scan_root_directory = @SCAN_ROOT
+      AND scan_root_directory = (SELECT scan_root FROM selected_root)
     GROUP BY duplicate_group
 );
 
@@ -163,7 +159,7 @@ SELECT
     printf("%.2f MB", SUM(file_size_bytes) / 1048576.0) as total_size
 FROM files
 WHERE is_deleted = 0
-  AND scan_root_directory = @SCAN_ROOT
+  AND scan_root_directory = (SELECT scan_root FROM selected_root)
 GROUP BY parent_directory
 ORDER BY total_bytes DESC
 LIMIT 20;
@@ -180,7 +176,7 @@ SELECT
 FROM files
 WHERE is_deleted = 0 
   AND modified_timestamp IS NOT NULL
-  AND scan_root_directory = @SCAN_ROOT
+  AND scan_root_directory = (SELECT scan_root FROM selected_root)
 ORDER BY modified_timestamp ASC
 LIMIT 10;
 
@@ -193,7 +189,7 @@ SELECT
 FROM files
 WHERE is_deleted = 0 
   AND modified_timestamp IS NOT NULL
-  AND scan_root_directory = @SCAN_ROOT
+  AND scan_root_directory = (SELECT scan_root FROM selected_root)
 ORDER BY modified_timestamp DESC
 LIMIT 10;
 
@@ -207,7 +203,7 @@ SELECT
 FROM files
 WHERE is_deleted = 0 
   AND file_size_bytes = 0
-  AND scan_root_directory = @SCAN_ROOT
+  AND scan_root_directory = (SELECT scan_root FROM selected_root)
 ORDER BY file_name;
 
 -- -----------------------------------------------------------------------------
@@ -220,7 +216,7 @@ SELECT
     deleted_at
 FROM files
 WHERE is_deleted = 1
-  AND scan_root_directory = @SCAN_ROOT
+  AND scan_root_directory = (SELECT scan_root FROM selected_root)
 ORDER BY deleted_at DESC;
 
 -- -----------------------------------------------------------------------------
@@ -230,15 +226,15 @@ SELECT
     file_extension,
     COUNT(*) as count,
     printf("%.1f%%", COUNT(*) * 100.0 / 
-        (SELECT COUNT(*) FROM files WHERE is_deleted = 0 AND scan_root_directory = @SCAN_ROOT)) as count_pct,
+        (SELECT COUNT(*) FROM files WHERE is_deleted = 0 AND scan_root_directory = (SELECT scan_root FROM selected_root))) as count_pct,
     SUM(file_size_bytes) as size_bytes,
     printf("%.2f MB", SUM(file_size_bytes) / 1048576.0) as total_size,
     printf("%.1f%%", SUM(file_size_bytes) * 100.0 / 
-        (SELECT SUM(file_size_bytes) FROM files WHERE is_deleted = 0 AND scan_root_directory = @SCAN_ROOT)) as size_pct,
+        (SELECT SUM(file_size_bytes) FROM files WHERE is_deleted = 0 AND scan_root_directory = (SELECT scan_root FROM selected_root))) as size_pct,
     printf("%.2f KB", AVG(file_size_bytes) / 1024.0) as avg_size
 FROM files
 WHERE is_deleted = 0
-  AND scan_root_directory = @SCAN_ROOT
+  AND scan_root_directory = (SELECT scan_root FROM selected_root)
 GROUP BY file_extension
 ORDER BY size_bytes DESC;
 
@@ -265,7 +261,7 @@ SELECT
 FROM files
 WHERE is_deleted = 0 
   AND file_size_bytes > 0
-  AND scan_root_directory = @SCAN_ROOT
+  AND scan_root_directory = (SELECT scan_root FROM selected_root)
 GROUP BY file_size_bytes
 HAVING COUNT(*) > 1
 ORDER BY same_size_count DESC
@@ -281,6 +277,6 @@ SELECT
     full_path
 FROM files
 WHERE is_deleted = 0
-  AND scan_root_directory = @SCAN_ROOT
+  AND scan_root_directory = (SELECT scan_root FROM selected_root)
 ORDER BY last_seen DESC
 LIMIT 50;
