@@ -48,6 +48,21 @@ Dir_Analytics/
 └── Dir_Analytics.bat  # Windows launcher
 ```
 
+## Development Setup
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/krishnakanthb13/0_Dir_Analytics.git
+   cd Dir_Analytics
+   ```
+
+2. **No dependencies needed**:
+   The project uses only the Python Standard Library.
+
+3. **Running the tool**:
+   - On Windows: Run `Dir_Analytics.bat`
+   - Any OS: `python dir_analytics.py`
+
 ## Testing
 
 Before submitting:

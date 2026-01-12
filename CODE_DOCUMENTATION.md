@@ -1,4 +1,4 @@
-# Code Documentation
+# CODE_DOCUMENTATION
 
 Technical reference for the Directory Analytics CLI Tool codebase.
 
@@ -44,7 +44,7 @@ graph TD
 ## Folder & File Structure
 
 ```
-e:\0_Dir_Analytics\
+Project Root/
 ├── Dir_Analytics.bat          # Windows launcher
 ├── dir_analytics.py           # Main entry point
 ├── config.py                  # Configuration (multi-directory)
@@ -55,16 +55,31 @@ e:\0_Dir_Analytics\
 ├── logger.py                  # Session logging
 ├── dir_analytics.sql          # SQL query reference
 ├── README.md                  # User documentation
-├── context_readme.md          # Why this tool exists
-├── code_readme.md             # Technical documentation
+├── DESIGN_PHILOSOPHY.md       # Why this tool exists
+├── CODE_DOCUMENTATION.md      # Technical documentation
 ├── CONTRIBUTING.md            # Contribution guidelines
 ├── LICENSE                    # GNU GPL v3
 ├── .gitignore                 # Git ignore rules
-└── Data File/                 # Created at runtime
+└── Data File/                 # Created at runtime (Ignored by Git)
     ├── dir_analytics.db       # SQLite database (primary)
     ├── session_*.log          # Session logs
     └── export_*.csv           # CSV backup exports
 ```
+
+## Dependencies & Integrations
+
+### Python Standard Library
+This tool is designed with **zero external dependencies**. It uses only built-in Python modules:
+- `os`: File system navigation and path manipulation
+- `sqlite3`: Data storage and querying
+- `csv`: Data export
+- `hashlib`: Duplicate detection (MD5/SHA)
+- `datetime`: Timestamp processing
+- `sys`: Command-line arguments and exit codes
+
+### API / External Integrations
+- **SQLite 3**: Embedded database engine (No external server required)
+- **DB Browser for SQLite**: Optional integration for visual database management
 
 ## Module Breakdown
 

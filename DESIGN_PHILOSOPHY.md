@@ -1,4 +1,4 @@
-# Context: Why This Tool Exists
+# DESIGN_PHILOSOPHY
 
 ## The Problem
 

@@ -1,6 +1,14 @@
 # Directory Analytics CLI Tool
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 A fast, production-ready CLI tool for directory scanning, file analytics, and duplicate detection.
+
+## 📖 Documentation
+
+- [Design Philosophy](DESIGN_PHILOSOPHY.md) - Rationale and design decisions
+- [Code Documentation](CODE_DOCUMENTATION.md) - Technical architecture and API
+- [Contributing Guidelines](CONTRIBUTING.md) - How to contribute to the project
 
 ## Features
 
@@ -16,11 +24,11 @@ A fast, production-ready CLI tool for directory scanning, file analytics, and du
 
 1. **Configure directories** in `config.py`:
    ```python
-   SCAN_DIRECTORIES = [
-       r"D:\\",
-       r"E:\\",
+    SCAN_DIRECTORIES = [
+        r"D:\\",
+        r"E:\\",
        r"C:\Users\ADMIN\Documents",
-   ]
+    ]
    ```
 
 2. **Run the tool**:
